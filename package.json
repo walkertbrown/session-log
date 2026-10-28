@@ -1,6 +1,6 @@
 {
 	"name": "session-log",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Session Log, a quick log for tabletop sessions that writes timestamped lines into an Obsidian note.",
 	"main": "main.js",
 	"type": "module",
