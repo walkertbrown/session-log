@@ -1,0 +1,127 @@
+/* Session Log. Uses Obsidian's theme variables so it fits light, dark and community themes. */
+
+.sl {
+	--sl-radius: var(--radius-m, 8px);
+	--sl-accent: var(--interactive-accent, #7852ee);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: calc(var(--sl-radius) + 4px);
+	background: var(--background-secondary);
+	padding: 10px;
+	font-family: var(--font-interface);
+	font-size: var(--font-ui-medium, 15px);
+}
+.sl.sl-modal {
+	border: 0;
+	background: transparent;
+	padding: 0;
+}
+
+.sl button {
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+	box-shadow: none;
+	height: auto;
+}
+
+.sl-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 8px;
+	flex-wrap: wrap;
+}
+.sl-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 600;
+}
+.sl-icon {
+	display: inline-flex;
+	color: var(--sl-accent);
+}
+.sl-icon svg {
+	width: 18px;
+	height: 18px;
+}
+.sl-meta {
+	font-size: 0.8em;
+	color: var(--text-muted);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
+}
+
+.sl-form {
+	display: flex;
+	gap: 6px;
+}
+.sl-input {
+	flex: 1;
+	min-width: 0;
+	padding: 8px 10px !important;
+	border-radius: var(--sl-radius) !important;
+	font-size: 1em !important;
+}
+.sl-input:focus {
+	border-color: var(--sl-accent) !important;
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--sl-accent) 25%, transparent) !important;
+}
+.sl-add {
+	padding: 6px 16px;
+	border-radius: var(--sl-radius);
+	border: 1px solid var(--sl-accent);
+	background: var(--sl-accent) !important;
+	color: var(--text-on-accent, #fff) !important;
+	font-weight: 600;
+}
+.sl-add:hover {
+	filter: brightness(1.1);
+}
+.sl-add:active {
+	transform: translateY(1px);
+}
+
+.sl-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+	margin-top: 8px;
+}
+.sl-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.8em !important;
+	padding: 2px 10px;
+	border-radius: 999px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	color: var(--text-muted) !important;
+	transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+.sl-tag:hover {
+	border-color: var(--sl-accent);
+}
+.sl-tag.is-on {
+	border-color: var(--sl-accent);
+	background: color-mix(in srgb, var(--sl-accent) 18%, transparent);
+	color: var(--text-normal) !important;
+}
+.sl-tag-count {
+	min-width: 1.4em;
+	padding: 0 5px;
+	border-radius: 999px;
+	background: var(--background-modifier-hover, rgba(127, 127, 127, 0.15));
+	font-size: 0.9em;
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+}
+
+@media (max-width: 480px) {
+	.sl-add {
+		padding: 6px 12px;
+	}
+}
