@@ -68,6 +68,7 @@ By hand: copy `main.js`, `manifest.json` and `styles.css` from the latest releas
 
 - [Quick Initiative](https://github.com/walkertbrown/quick-initiative): an initiative tracker that keeps the fight as plain text in your note and reads Fantasy Statblocks creature notes.
 - [Dice Tray](https://github.com/walkertbrown/dice-tray): rolls dice, random tables and note sections inline, and reads Dice Roller's `dice:` syntax.
+- [Encounter Builder](https://github.com/walkertbrown/encounter-builder): plan fights against the 5E XP budget, then start them in Quick Initiative.
 
 ## Source
 
