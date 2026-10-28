@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	appendEntry,
+	clockLine,
 	entries,
 	fightLines,
 	formatEntry,
@@ -125,5 +126,20 @@ describe('session notes', () => {
 		expect(n).toContain('session: 12\ndate: 2026-10-28');
 		expect(n).toContain('Previously: [[Session 11]]');
 		expect(appendEntry(n, 'x')).not.toBeNull();
+	});
+});
+
+describe('clockLine', () => {
+	const c = (filled: number, previous: number, link?: string) => ({ name: 'Alarm', link, filled, previous, size: 4 });
+	it('says how a clock moved', () => {
+		expect(clockLine(c(2, 1))).toBe('Alarm: 2/4');
+		expect(clockLine(c(4, 3))).toBe('Alarm: full (4/4)');
+		expect(clockLine(c(1, 3))).toBe('Alarm: back to 1/4');
+		expect(clockLine(c(0, 2))).toBe('Alarm: cleared');
+		expect(clockLine(c(2, 2))).toBeNull();
+	});
+	it('keeps the link the clock is named with', () => {
+		expect(clockLine(c(1, 0, 'Alarm'))).toBe('[[Alarm]]: 1/4');
+		expect(clockLine(c(1, 0, 'The Watch'))).toBe('[[The Watch|Alarm]]: 1/4');
 	});
 });

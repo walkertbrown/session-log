@@ -113,6 +113,17 @@ describe('fights from Quick Initiative', () => {
 		await flush();
 		expect(content()).not.toContain('d6 -> [4]');
 	});
+	it('logs a clock that ticks, and not when clocks are off', async () => {
+		const { app, plugin, content } = await setup();
+		app.workspace.trigger('tabletop-clocks:change', { sourcePath: 'Game.md', name: 'Alarm', filled: 3, previous: 2, size: 4, full: false });
+		app.workspace.trigger('tabletop-clocks:change', { sourcePath: 'Game.md', name: 'Alarm', filled: 4, previous: 3, size: 4, full: true });
+		await flush();
+		expect(content()).toContain('- 20:14 Alarm: 3/4\n- 20:14 Alarm: full (4/4)\n');
+		plugin.settings.logClocks = false;
+		app.workspace.trigger('tabletop-clocks:change', { sourcePath: 'Game.md', name: 'Alarm', filled: 0, previous: 4, size: 4, full: false });
+		await flush();
+		expect(content()).not.toContain('cleared');
+	});
 	it('sends fights in other notes to the last session log', async () => {
 		const { app, content } = await setup();
 		app.notes.set('Mill.md', { path: 'Mill.md', content: '```initiative\n```' });

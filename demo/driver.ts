@@ -1,10 +1,11 @@
-// Browser demo: runs the real Session Log and Quick Initiative plugins against the test shim,
+// Browser demo: runs the real Session Log, Quick Initiative, Dice Tray and Tabletop Clocks plugins against the test shim,
 // over a sample session note, and shows the note's text changing as they are used.
 import { App, installDomHelpers } from '../test/obsidian-shim';
 import SessionLogPlugin from '../src/main';
 import { entries } from '../src/log';
 import QuickInitiativePlugin from '../../quick-initiative/src/main';
 import DiceTrayPlugin from '../../dice-tray/src/main';
+import TabletopClocksPlugin from '../../tabletop-clocks/src/main';
 
 installDomHelpers();
 
@@ -20,6 +21,7 @@ const ICONS: Record<string, string> = {
 	shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
 	heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
 	sword: '<polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/>',
+	clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
 	dices: '<rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/>',
 };
 (globalThis as unknown as { __iconHook: (el: HTMLElement, name: string) => void }).__iconHook = (el, name) => {
@@ -40,6 +42,12 @@ Previously: [[Session 11]]
 - 19:02 Reached Millbrook at dusk #place
 - 19:10 Met [[Old Wenna]], the miller's wife #npc
 - 19:24 Her son went up to the mill and never came back #quest
+
+## Clocks
+
+\`\`\`clocks
+The trail goes cold 1/4
+\`\`\`
 
 ## Fight
 
@@ -76,6 +84,9 @@ async function main() {
 	const dice = new DiceTrayPlugin(app as never, { id: 'dice-tray' } as never);
 	await dice.onload();
 	dice.settings.animate = false;
+	const clocks = new TabletopClocksPlugin(app as never, { id: 'tabletop-clocks' } as never);
+	await clocks.onload();
+	const clockProc = (clocks as never as { codeBlocks: Record<string, Proc> }).codeBlocks.clocks!;
 	const diceProcs = (dice as never as { postProcessors: ((e: HTMLElement, c: Ctx) => void)[] }).postProcessors;
 	const logProc = (log as never as { codeBlocks: Record<string, Proc> }).codeBlocks['session-log']!;
 	const qiProc = (qi as never as { codeBlocks: Record<string, Proc> }).codeBlocks.initiative!;
@@ -98,6 +109,17 @@ async function main() {
 	const list = document.querySelector<HTMLElement>('#entries');
 	const tracker = document.querySelector<HTMLElement>('#tracker');
 	const rolls = document.querySelector<HTMLElement>('#rolls');
+	const board = document.querySelector<HTMLElement>('#clocks');
+	const blockBody = (lang: string) => {
+		const info = ctx(lang).getSectionInfo();
+		return note().split('\n').slice(info.lineStart + 1, info.lineEnd).join('\n');
+	};
+	const drawClocks = () => {
+		if (!board) return;
+		const typing = board.contains(document.activeElement);
+		clockProc(blockBody('clocks'), board, ctx('clocks'));
+		if (typing) board.querySelector<HTMLInputElement>('.pc-add-input')?.focus();
+	};
 	const rollsHtml = rolls?.innerHTML ?? '';
 
 	// the entries as reading view shows them: links and tags styled
@@ -143,20 +165,19 @@ async function main() {
 			drawList();
 			drawBar();
 		}
+		if (/```clocks[\s\S]*?```/.exec(before)?.[0] !== /```clocks[\s\S]*?```/.exec(out)?.[0]) drawClocks();
 		return out;
 	};
 
 	const render = () => {
 		drawBar();
 		drawList();
+		drawClocks();
 		if (rolls) {
 			rolls.innerHTML = rollsHtml;
 			for (const pp of diceProcs) pp(rolls, { sourcePath: 'Game.md', addChild: () => {}, getSectionInfo: () => null } as never);
 		}
-		if (tracker) {
-			const info = ctx('initiative').getSectionInfo();
-			qiProc(note().split('\n').slice(info.lineStart + 1, info.lineEnd).join('\n'), tracker, ctx('initiative'));
-		}
+		if (tracker) qiProc(blockBody('initiative'), tracker, ctx('initiative'));
 		showSource();
 	};
 	render();

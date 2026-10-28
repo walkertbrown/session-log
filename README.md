@@ -64,11 +64,23 @@ With [Dice Tray](https://github.com/walkertbrown/dice-tray) installed, a roll yo
 
 Rolls go where fights go: the log in the same note, or the last log you used. Turn this off in settings.
 
+## Clocks
+
+With [Tabletop Clocks](https://github.com/walkertbrown/tabletop-clocks) installed, every clock you tick goes into the log too:
+
+```
+- 21:02 The watch closes in: 3/6
+- 21:15 The watch closes in: full (6/6)
+- 21:40 [[The Red Hand]]: back to 2/8
+```
+
+They go where fights and rolls go. Turn this off in settings.
+
 ## Settings
 
 - **Quick tags**: the tags under the box, separated by commas. Default `npc, loot, quest, clue, place`.
 - **Add the time** and **24-hour clock**: `20:14`, `8:14pm`, or no time at all.
-- **Log fights**, **Log the whole fight** and **Log rolls**: on by default.
+- **Log fights**, **Log the whole fight**, **Log rolls** and **Log clocks**: on by default.
 - **Session folder**: where **New session note** puts notes. Default `Sessions`.
 
 ## Privacy

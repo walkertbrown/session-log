@@ -14,6 +14,8 @@ import {
 	appendEntry,
 	entries,
 	FightState,
+	clockLine,
+	ClockTick,
 	fightLines,
 	formatEntry,
 	hasBlock,
@@ -31,6 +33,7 @@ interface Settings {
 	logFights: boolean; // write Quick Initiative fights into the log
 	wholeFight: boolean; // and the middle of them: rounds, hits, heals, conditions
 	logRolls: boolean; // write Dice Tray rolls someone clicked into the log
+	logClocks: boolean; // write Tabletop Clocks ticks into the log
 	folder: string; // where "New session note" puts notes
 }
 
@@ -41,6 +44,7 @@ const DEFAULT_SETTINGS: Settings = {
 	logFights: true,
 	wholeFight: true,
 	logRolls: true,
+	logClocks: true,
 	folder: 'Sessions',
 };
 
@@ -50,6 +54,10 @@ const BLOCK = '```session-log\n```\n';
 interface RollEvent {
 	sourcePath: string;
 	text: string;
+}
+
+interface ClockEvent extends ClockTick {
+	sourcePath: string;
 }
 
 // Quick Initiative's event; only the fields read here.
@@ -91,6 +99,8 @@ export default class SessionLogPlugin extends Plugin {
 		this.registerEvent(ws.on('quick-initiative:change', (e) => void this.onFight(e)));
 		const dice = this.app.workspace as unknown as { on(name: string, cb: (e: RollEvent) => void): EventRef };
 		this.registerEvent(dice.on('dice-tray:roll', (e) => void this.onRoll(e)));
+		const clocks = this.app.workspace as unknown as { on(name: string, cb: (e: ClockEvent) => void): EventRef };
+		this.registerEvent(clocks.on('tabletop-clocks:change', (e) => void this.onClock(e)));
 		this.addSettingTab(new SettingTab(this.app, this));
 	}
 
@@ -152,6 +162,14 @@ export default class SessionLogPlugin extends Plugin {
 		if (!this.settings.logRolls || !e.text) return;
 		const path = (await this.notePath(e.sourcePath)) ?? (await this.notePath(this.lastPath));
 		if (path) await this.log(path, `Rolled ${e.text}`);
+	}
+
+	// Tabletop Clocks: a clock someone ticked, wherever its block is
+	async onClock(e: ClockEvent) {
+		const line = this.settings.logClocks ? clockLine(e) : null;
+		if (!line) return;
+		const path = (await this.notePath(e.sourcePath)) ?? (await this.notePath(this.lastPath));
+		if (path) await this.log(path, line);
 	}
 
 	async newSession(): Promise<TFile | null> {
@@ -335,6 +353,11 @@ class SettingTab extends PluginSettingTab {
 				name: 'Log rolls',
 				desc: 'When Dice Tray is installed, note each roll you click, with the dice it showed.',
 				control: { type: 'toggle', key: 'logRolls', defaultValue: true },
+			},
+			{
+				name: 'Log clocks',
+				desc: 'When Tabletop Clocks is installed, note each clock that ticks, drops or fills.',
+				control: { type: 'toggle', key: 'logClocks', defaultValue: true },
 			},
 			{
 				name: 'Session folder',

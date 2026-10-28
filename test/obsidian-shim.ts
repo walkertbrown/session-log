@@ -26,6 +26,19 @@ export function installDomHelpers() {
 	P.show = function (this: HTMLElement) { this.style.display = ''; };
 	P.toggleClass = function (this: HTMLElement, c: string, on: boolean) { this.classList.toggle(c, on); };
 	P.setAttr = function (this: HTMLElement, k: string, v: string) { this.setAttribute(k, v); };
+	P.setCssProps = function (this: HTMLElement, props: Record<string, string>) { for (const [k, v] of Object.entries(props)) this.style.setProperty(k, v); };
+	Object.defineProperty(P, 'doc', { get(this: HTMLElement) { return this.ownerDocument; }, configurable: true });
+	(Element.prototype as unknown as Record<string, unknown>).createSvg = function (
+		this: Element,
+		tag: string,
+		o?: { cls?: string; attr?: Record<string, string | number | boolean | null> },
+	) {
+		const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+		if (o?.cls) el.setAttribute('class', o.cls);
+		for (const [k, v] of Object.entries(o?.attr ?? {})) if (v !== null && v !== false) el.setAttribute(k, String(v));
+		this.appendChild(el);
+		return el;
+	};
 	(globalThis as unknown as Record<string, unknown>).createSpan = (o?: Opts) => make.call(undefined, 'span', o);
 	(globalThis as unknown as Record<string, unknown>).createDiv = (o?: Opts) => make.call(undefined, 'div', o);
 }

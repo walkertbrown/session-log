@@ -168,6 +168,27 @@ function list(xs: string[]): string {
 	return xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`;
 }
 
+// Tabletop Clocks' event; only the fields read here.
+export interface ClockTick {
+	name: string;
+	link?: string;
+	filled: number;
+	previous: number;
+	size: number;
+}
+
+// One line for a clock that moved: "Alarm: 3/4", "Alarm: full (4/4)". Clock names are
+// often phrases ("The trail goes cold"), so the name stands alone before a colon.
+export function clockLine(e: ClockTick): string | null {
+	if (e.filled === e.previous) return null;
+	const name = e.link ? `[[${e.link}${e.link === e.name ? '' : `|${e.name}`}]]` : e.name;
+	const at = `${e.filled}/${e.size}`;
+	if (e.filled >= e.size) return `${name}: full (${at})`;
+	if (e.filled > e.previous) return `${name}: ${at}`;
+	if (e.filled === 0) return `${name}: cleared`;
+	return `${name}: back to ${at}`;
+}
+
 // The number for the next "Session N" note, from the names already there.
 export function nextSessionNumber(names: string[]): number {
 	let max = 0;
