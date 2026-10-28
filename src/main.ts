@@ -29,6 +29,7 @@ interface Settings {
 	clock24: boolean; // 20:14 rather than 8:14pm
 	addTime: boolean; // put the time in front of each entry
 	logFights: boolean; // write Quick Initiative fights into the log
+	wholeFight: boolean; // and the middle of them: rounds, hits, heals, conditions
 	logRolls: boolean; // write Dice Tray rolls someone clicked into the log
 	folder: string; // where "New session note" puts notes
 }
@@ -38,6 +39,7 @@ const DEFAULT_SETTINGS: Settings = {
 	clock24: true,
 	addTime: true,
 	logFights: true,
+	wholeFight: true,
 	logRolls: true,
 	folder: 'Sessions',
 };
@@ -138,7 +140,7 @@ export default class SessionLogPlugin extends Plugin {
 		const prev = this.fights.get(e.sourcePath);
 		this.fights.set(e.sourcePath, { round: e.round, combatants: e.combatants.map((c) => ({ ...c })) });
 		if (!this.settings.logFights) return;
-		const lines = fightLines(prev, e);
+		const lines = fightLines(prev, e, this.settings.wholeFight);
 		if (!lines.length) return;
 		const path = (await this.notePath(e.sourcePath)) ?? (await this.notePath(this.lastPath));
 		if (!path) return;
@@ -323,6 +325,11 @@ class SettingTab extends PluginSettingTab {
 				name: 'Log fights',
 				desc: 'When Quick Initiative is installed, note when a fight starts, who goes down, and when it ends.',
 				control: { type: 'toggle', key: 'logFights', defaultValue: true },
+			},
+			{
+				name: 'Log the whole fight',
+				desc: 'Also note each new round, every hit and heal with the hit points left, and conditions going on and off. Off: just the start, who goes down, and the end.',
+				control: { type: 'toggle', key: 'wholeFight', defaultValue: true },
 			},
 			{
 				name: 'Log rolls',

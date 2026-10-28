@@ -1,7 +1,7 @@
 {
 	"id": "session-log",
 	"name": "Session Log",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"minAppVersion": "1.13.0",
 	"description": "A quick log for tabletop sessions. Type what happened and it lands in your session note with the time, tags and links. Logs Quick Initiative fights by itself.",
 	"author": "Bananafest Destiny",

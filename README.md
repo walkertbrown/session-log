@@ -41,9 +41,15 @@ With [Quick Initiative](https://github.com/walkertbrown/quick-initiative) instal
 
 ```
 - 20:14 Fight started: Aria, Borin, Goblin ×3, Bugbear
+- 20:15 Bugbear takes 9 (18/27)
+- 20:16 Borin is poisoned
+- 20:17 Round 2
 - 20:19 Goblin 1 is down (round 2)
+- 20:22 Aria heals 7 (31/31)
 - 20:31 Fight over after 4 rounds. Down: Goblin ×3
 ```
+
+Every hit and heal is noted with the hit points left, and conditions going on and off. Turn off **Log the whole fight** in settings and only the start, who goes down, and the end are noted.
 
 A fight in the session note goes into its log. A fight in another note (a dungeon room, say) goes into the last log you used. Turn this off in settings.
 
@@ -62,7 +68,7 @@ Rolls go where fights go: the log in the same note, or the last log you used. Tu
 
 - **Quick tags**: the tags under the box, separated by commas. Default `npc, loot, quest, clue, place`.
 - **Add the time** and **24-hour clock**: `20:14`, `8:14pm`, or no time at all.
-- **Log fights** and **Log rolls**: on by default.
+- **Log fights**, **Log the whole fight** and **Log rolls**: on by default.
 - **Session folder**: where **New session note** puts notes. Default `Sessions`.
 
 ## Privacy

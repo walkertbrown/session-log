@@ -121,21 +121,38 @@ export function groupNames(names: string[]): string {
 // What Quick Initiative reports on each change (its `quick-initiative:change` event).
 export interface FightState {
 	round: number;
-	combatants: { name: string; hp?: number; player: boolean }[];
+	combatants: { name: string; hp?: number; maxHp?: number; player: boolean; conditions?: string[] }[];
 }
 
-// The log lines one change to a fight is worth: start, someone going down, the end.
-export function fightLines(prev: FightState | undefined, next: FightState): string[] {
+// The log lines one change to a fight is worth: start, someone going down, the end,
+// and with `whole` the middle too: each new round, hits, heals and conditions.
+export function fightLines(prev: FightState | undefined, next: FightState, whole = true): string[] {
 	const out: string[] = [];
 	const before = prev?.round ?? 0;
 	if (before === 0 && next.round === 1) {
 		out.push(`Fight started: ${groupNames(next.combatants.map((c) => c.name))}`);
 	}
 	if (prev && next.round > 0) {
-		const was = new Map(prev.combatants.map((c) => [c.name, c.hp]));
+		if (whole && before > 0 && next.round > before) out.push(`Round ${next.round}`);
+		const was = new Map(prev.combatants.map((c) => [c.name, c]));
 		for (const c of next.combatants) {
-			const hp = was.get(c.name);
+			const w = was.get(c.name);
+			if (!w) continue;
+			const hp = w.hp;
+			const left = c.maxHp !== undefined ? ` (${c.hp}/${c.maxHp})` : ` (${c.hp} left)`;
 			if (c.hp === 0 && hp !== undefined && hp > 0) out.push(`${c.name} is down (round ${next.round})`);
+			else if (whole && c.hp !== undefined && hp !== undefined && c.hp !== hp) {
+				if (hp === 0) out.push(`${c.name} is back up${left}`);
+				else if (c.hp < hp) out.push(`${c.name} takes ${hp - c.hp}${left}`);
+				else out.push(`${c.name} heals ${c.hp - hp}${left}`);
+			}
+			if (!whole || !c.conditions || !w.conditions) continue;
+			const had = new Set(w.conditions.map((x) => x.toLowerCase()));
+			const has = new Set(c.conditions.map((x) => x.toLowerCase()));
+			const on = c.conditions.filter((x) => !had.has(x.toLowerCase()));
+			const off = w.conditions.filter((x) => !has.has(x.toLowerCase()));
+			if (on.length) out.push(`${c.name} is ${list(on)}`);
+			if (off.length) out.push(`${c.name} is no longer ${list(off)}`);
 		}
 	}
 	if (prev && before > 0 && next.round === 0) {
@@ -144,6 +161,11 @@ export function fightLines(prev: FightState | undefined, next: FightState): stri
 		out.push(`Fight over after ${rounds}${down.length ? `. Down: ${groupNames(down)}` : ''}`);
 	}
 	return out;
+}
+
+// "poisoned", "poisoned and prone", "poisoned, prone and blinded"
+function list(xs: string[]): string {
+	return xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`;
 }
 
 // The number for the next "Session N" note, from the names already there.

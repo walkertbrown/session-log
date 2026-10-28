@@ -88,10 +88,26 @@ describe('fights', () => {
 		expect(fightLines(undefined, r1)).toEqual(['Fight started: Aria, Goblin ×2, Bugbear']);
 		expect(fightLines(before, r1)).toEqual(['Fight started: Aria, Goblin ×2, Bugbear']);
 		const hit = { round: 2, combatants: fighters([31, 0, 7, 27]) };
-		expect(fightLines(r1, hit)).toEqual(['Goblin 1 is down (round 2)']);
+		expect(fightLines(r1, hit)).toEqual(['Round 2', 'Goblin 1 is down (round 2)']);
+		expect(fightLines(r1, hit, false)).toEqual(['Goblin 1 is down (round 2)']);
 		expect(fightLines(hit, hit)).toEqual([]);
 		const end = { round: 0, combatants: fighters([31, 0, 0, 27]) };
 		expect(fightLines({ ...hit, combatants: end.combatants }, end)).toEqual(['Fight over after 2 rounds. Down: Goblin ×2']);
+	});
+	it('logs the middle of the fight: hits, heals, getting back up, conditions', () => {
+		const at = (hp: number[], cond: string[][] = []) => ({
+			round: 2,
+			combatants: fighters(hp).map((c, i) => ({ ...c, maxHp: i === 3 ? 27 : undefined, conditions: cond[i] ?? [] })),
+		});
+		expect(fightLines(at([31, 7, 7, 27]), at([31, 7, 7, 18]))).toEqual(['Bugbear takes 9 (18/27)']);
+		expect(fightLines(at([31, 7, 7, 18]), at([31, 7, 7, 20]))).toEqual(['Bugbear heals 2 (20/27)']);
+		expect(fightLines(at([31, 7, 3, 27]), at([24, 7, 3, 27]))).toEqual(['Aria takes 7 (24 left)']);
+		expect(fightLines(at([0, 7, 7, 27]), at([5, 7, 7, 27]))).toEqual(['Aria is back up (5 left)']);
+		expect(fightLines(at([31, 7, 7, 27]), at([31, 7, 7, 27], [['Poisoned', 'Prone']]))).toEqual(['Aria is Poisoned and Prone']);
+		expect(fightLines(at([31, 7, 7, 27], [['poisoned', 'prone']]), at([31, 7, 7, 27], [['prone']]))).toEqual(['Aria is no longer poisoned']);
+		expect(fightLines(at([31, 7, 7, 27]), at([31, 7, 7, 18], [[], [], [], ['frightened']]), false)).toEqual([]);
+		// an older Quick Initiative sends no conditions: nothing to compare, nothing logged
+		expect(fightLines({ round: 2, combatants: fighters([31, 7, 7, 27]) }, at([31, 7, 7, 27], [['prone']]))).toEqual([]);
 	});
 	it('does not call a fight started on a later round or with no history', () => {
 		expect(fightLines(undefined, { round: 3, combatants: fighters([31, 0, 7, 27]) })).toEqual([]);

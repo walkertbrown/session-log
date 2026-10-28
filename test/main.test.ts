@@ -85,6 +85,24 @@ describe('fights from Quick Initiative', () => {
 			'- 20:14 Fight started: Aria, Goblin ×2\n- 20:14 Goblin 1 is down (round 1)\n- 20:14 Fight over after 1 round. Down: Goblin ×2\n',
 		);
 	});
+	it('logs hits, conditions and rounds, unless the whole fight is off', async () => {
+		const { app, plugin, content } = await setup();
+		const fire = async (round: number, hp: number[], cond: string[] = []) => {
+			const combatants = fighters(hp).map((c, i) => ({ ...c, maxHp: i ? 7 : 31, conditions: i === 0 ? cond : [] }));
+			app.workspace.trigger('quick-initiative:change', { sourcePath: 'Game.md', round, current: null, combatants });
+			await flush();
+		};
+		await fire(1, [31, 7, 7]);
+		await fire(1, [31, 3, 7]);
+		await fire(2, [31, 3, 7]);
+		await fire(2, [31, 3, 7], ['prone']);
+		expect(content()).toContain('- 20:14 Goblin 1 takes 4 (3/7)\n- 20:14 Round 2\n- 20:14 Aria is prone\n');
+		plugin.settings.wholeFight = false;
+		await fire(2, [20, 3, 7]);
+		await fire(2, [20, 0, 7]);
+		expect(content()).not.toContain('Aria takes');
+		expect(content()).toContain('- 20:14 Goblin 1 is down (round 2)\n');
+	});
 	it('logs a clicked Dice Tray roll, and not when rolls are off', async () => {
 		const { app, plugin, content } = await setup();
 		app.workspace.trigger('dice-tray:roll', { sourcePath: 'Game.md', expression: '1d20 + 5', text: '1d20 + 5 -> [17] + 5 -> 22' });
