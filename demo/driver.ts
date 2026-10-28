@@ -4,6 +4,7 @@ import { App, installDomHelpers } from '../test/obsidian-shim';
 import SessionLogPlugin from '../src/main';
 import { entries } from '../src/log';
 import QuickInitiativePlugin from '../../quick-initiative/src/main';
+import DiceTrayPlugin from '../../dice-tray/src/main';
 
 installDomHelpers();
 
@@ -42,6 +43,8 @@ Previously: [[Session 11]]
 
 ## Fight
 
+The bugbear swings \`dice: 1d20 + 4\` for \`dice: 2d8 + 2\`.
+
 \`\`\`initiative
 Aria player init 17 hp 31 ac 16
 Borin player init 9 hp 44 ac 18
@@ -70,6 +73,10 @@ async function main() {
 	};
 	const qi = new QuickInitiativePlugin(app as never, { id: 'quick-initiative' } as never);
 	await qi.onload();
+	const dice = new DiceTrayPlugin(app as never, { id: 'dice-tray' } as never);
+	await dice.onload();
+	dice.settings.animate = false;
+	const diceProcs = (dice as never as { postProcessors: ((e: HTMLElement, c: Ctx) => void)[] }).postProcessors;
 	const logProc = (log as never as { codeBlocks: Record<string, Proc> }).codeBlocks['session-log']!;
 	const qiProc = (qi as never as { codeBlocks: Record<string, Proc> }).codeBlocks.initiative!;
 
@@ -90,6 +97,8 @@ async function main() {
 	const bar = document.querySelector<HTMLElement>('#log');
 	const list = document.querySelector<HTMLElement>('#entries');
 	const tracker = document.querySelector<HTMLElement>('#tracker');
+	const rolls = document.querySelector<HTMLElement>('#rolls');
+	const rollsHtml = rolls?.innerHTML ?? '';
 
 	// the entries as reading view shows them: links and tags styled
 	const drawList = () => {
@@ -140,6 +149,10 @@ async function main() {
 	const render = () => {
 		drawBar();
 		drawList();
+		if (rolls) {
+			rolls.innerHTML = rollsHtml;
+			for (const pp of diceProcs) pp(rolls, { sourcePath: 'Game.md', addChild: () => {}, getSectionInfo: () => null } as never);
+		}
 		if (tracker) {
 			const info = ctx('initiative').getSectionInfo();
 			qiProc(note().split('\n').slice(info.lineStart + 1, info.lineEnd).join('\n'), tracker, ctx('initiative'));
