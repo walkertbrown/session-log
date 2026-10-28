@@ -47,11 +47,22 @@ With [Quick Initiative](https://github.com/walkertbrown/quick-initiative) instal
 
 A fight in the session note goes into its log. A fight in another note (a dungeon room, say) goes into the last log you used. Turn this off in settings.
 
+## Rolls
+
+With [Dice Tray](https://github.com/walkertbrown/dice-tray) installed, a roll you click goes into the log with the dice it showed:
+
+```
+- 20:16 Rolled 1d20 + dex -> [17] + 3 -> 20
+- 20:17 Rolled [[Encounters#Forest]]: Wolves
+```
+
+Rolls go where fights go: the log in the same note, or the last log you used. Turn this off in settings.
+
 ## Settings
 
 - **Quick tags**: the tags under the box, separated by commas. Default `npc, loot, quest, clue, place`.
 - **Add the time** and **24-hour clock**: `20:14`, `8:14pm`, or no time at all.
-- **Log fights**: on by default.
+- **Log fights** and **Log rolls**: on by default.
 - **Session folder**: where **New session note** puts notes. Default `Sessions`.
 
 ## Privacy

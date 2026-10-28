@@ -85,6 +85,16 @@ describe('fights from Quick Initiative', () => {
 			'- 20:14 Fight started: Aria, Goblin ×2\n- 20:14 Goblin 1 is down (round 1)\n- 20:14 Fight over after 1 round. Down: Goblin ×2\n',
 		);
 	});
+	it('logs a clicked Dice Tray roll, and not when rolls are off', async () => {
+		const { app, plugin, content } = await setup();
+		app.workspace.trigger('dice-tray:roll', { sourcePath: 'Game.md', expression: '1d20 + 5', text: '1d20 + 5 -> [17] + 5 -> 22' });
+		await flush();
+		expect(content()).toContain('- 19:02 Arrived #place\n- 20:14 Rolled 1d20 + 5 -> [17] + 5 -> 22\n');
+		plugin.settings.logRolls = false;
+		app.workspace.trigger('dice-tray:roll', { sourcePath: 'Game.md', expression: 'd6', text: 'd6 -> [4] -> 4' });
+		await flush();
+		expect(content()).not.toContain('d6 -> [4]');
+	});
 	it('sends fights in other notes to the last session log', async () => {
 		const { app, content } = await setup();
 		app.notes.set('Mill.md', { path: 'Mill.md', content: '```initiative\n```' });

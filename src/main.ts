@@ -29,6 +29,7 @@ interface Settings {
 	clock24: boolean; // 20:14 rather than 8:14pm
 	addTime: boolean; // put the time in front of each entry
 	logFights: boolean; // write Quick Initiative fights into the log
+	logRolls: boolean; // write Dice Tray rolls someone clicked into the log
 	folder: string; // where "New session note" puts notes
 }
 
@@ -37,10 +38,17 @@ const DEFAULT_SETTINGS: Settings = {
 	clock24: true,
 	addTime: true,
 	logFights: true,
+	logRolls: true,
 	folder: 'Sessions',
 };
 
 const BLOCK = '```session-log\n```\n';
+
+// Dice Tray's event; only the fields read here.
+interface RollEvent {
+	sourcePath: string;
+	text: string;
+}
 
 // Quick Initiative's event; only the fields read here.
 interface FightEvent extends FightState {
@@ -79,6 +87,8 @@ export default class SessionLogPlugin extends Plugin {
 		// a custom event, so it is not in Obsidian's typed list
 		const ws = this.app.workspace as unknown as { on(name: string, cb: (e: FightEvent) => void): EventRef };
 		this.registerEvent(ws.on('quick-initiative:change', (e) => void this.onFight(e)));
+		const dice = this.app.workspace as unknown as { on(name: string, cb: (e: RollEvent) => void): EventRef };
+		this.registerEvent(dice.on('dice-tray:roll', (e) => void this.onRoll(e)));
 		this.addSettingTab(new SettingTab(this.app, this));
 	}
 
@@ -133,6 +143,13 @@ export default class SessionLogPlugin extends Plugin {
 		const path = (await this.notePath(e.sourcePath)) ?? (await this.notePath(this.lastPath));
 		if (!path) return;
 		for (const l of lines) await this.log(path, l);
+	}
+
+	// Dice Tray: a roll someone clicked, in the note it was made in, else the last log used
+	async onRoll(e: RollEvent) {
+		if (!this.settings.logRolls || !e.text) return;
+		const path = (await this.notePath(e.sourcePath)) ?? (await this.notePath(this.lastPath));
+		if (path) await this.log(path, `Rolled ${e.text}`);
 	}
 
 	async newSession(): Promise<TFile | null> {
@@ -306,6 +323,11 @@ class SettingTab extends PluginSettingTab {
 				name: 'Log fights',
 				desc: 'When Quick Initiative is installed, note when a fight starts, who goes down, and when it ends.',
 				control: { type: 'toggle', key: 'logFights', defaultValue: true },
+			},
+			{
+				name: 'Log rolls',
+				desc: 'When Dice Tray is installed, note each roll you click, with the dice it showed.',
+				control: { type: 'toggle', key: 'logRolls', defaultValue: true },
 			},
 			{
 				name: 'Session folder',
