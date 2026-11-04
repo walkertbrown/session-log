@@ -95,6 +95,7 @@ By hand: copy `main.js`, `manifest.json` and `styles.css` from the latest releas
 
 ## Also from this maker
 
+- [Mapsmith](https://github.com/walkertbrown/mapsmith): towns, dungeons and ships drawn from a seed right in your note, with numbered places you can click for a name, a hook and a note. Press **Explore** to walk a dungeon room by room. Free, with a $6 Pro save that brings any map into Roll20 or Foundry with its walls and doors.
 - [Quick Initiative](https://github.com/walkertbrown/quick-initiative): an initiative tracker that keeps the fight as plain text in your note and reads Fantasy Statblocks creature notes.
 - [Dice Tray](https://github.com/walkertbrown/dice-tray): rolls dice, random tables and note sections inline, and reads Dice Roller's `dice:` syntax.
 - [Encounter Builder](https://github.com/walkertbrown/encounter-builder): plan fights against the 5E XP budget, then start them in Quick Initiative.
